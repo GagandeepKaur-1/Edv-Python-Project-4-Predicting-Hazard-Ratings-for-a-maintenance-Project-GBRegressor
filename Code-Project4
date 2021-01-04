@@ -1,0 +1,110 @@
+import numpy as np
+import pandas as pd
+import os
+
+
+os.getcwd()
+
+os.chdir("C:\\Users\\Gagandeep\\Documents")
+
+os.getcwd()
+
+h_train=pd.read_csv("Hazard_train.csv")
+h_test=pd.read_csv("Hazard_test_share.csv")
+
+h_train.shape
+
+h_test.shape
+
+for col in h_train.columns:
+    print(col,h_train[col].agg(["count","nunique"]))
+    
+    #agg(['count', 'size', 'nunique'])
+
+h_train["T1_V11"].value_counts()
+
+h_train.dtypes
+
+h_train.isnull().sum().sum()
+
+cols=["T1_V4","T1_V5","T1_V6","T1_V7","T1_V8","T1_V9","T1_V11","T1_V12","T1_V15","T1_V16","T1_V17","T2_V3",
+      "T2_V5","T2_V11","T2_V12","T2_V13"]
+
+for col in cols:
+    temp=pd.get_dummies(h_train[col],prefix=col,drop_first=True)
+    h_train=pd.concat([h_train,temp],1)
+    h_train.drop([col],1,inplace=True)
+    temp1=pd.get_dummies(h_test[col],prefix=col,drop_first=True)
+    h_test=pd.concat([h_test,temp1],1)
+    h_test.drop([col],1,inplace=True)
+
+h_train.dtypes
+
+h_test.shape
+
+h_train.columns
+
+h_train.drop(["T1_V5_E","T1_V5_L"],1,inplace=True)
+
+h_train.shape
+
+h_test.shape
+
+h_train.columns
+
+from sklearn.model_selection import train_test_split
+train1,train2=train_test_split(h_train,test_size=0.20,random_state=2)
+
+train2.shape
+
+target1X.columns
+
+target1X=train1["Hazard"]
+train1X=train1.drop(["Hazard"],1)
+target2y=train2["Hazard"]
+train2y=train2.drop(["Hazard"],1)
+
+train1X.shape
+
+train2y.shape
+
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error
+gbrt=GradientBoostingRegressor(max_depth=2,n_estimators=120)
+gbrt.fit(train1X,target1X)
+y_pred=gbrt.predict(train2y)
+errors=mean_squared_error(target2y,y_pred)
+
+
+
+mean_absolute_error(target2y,y_pred)
+
+score=1-(2.73/5.4)
+score
+
+bst_n_estimators=np.argmin(errors)+1
+gbrt_best=GradientBoostingRegressor(max_depth=2,n_estimators=bst_n_estimators)
+
+
+final_target=h_train["Hazard"]
+final_train=h_train.drop(["Hazard"],1)
+
+final_train.shape
+
+
+final_target.shape
+
+final_train.array.reshape(-1,1)
+
+gbrt_best.fit(final_train,final_target)
+
+predictions=gbrt_best.predict(h_test)
+
+predictions
+
+#prediction_df=pd.DataFrame(prediction,columns=['Counterfeit_Sales'])
+h_test=pd.read_csv("Hazard_test_share.csv")
+submission=pd.DataFrame(predictions,h_test["Id"])
+
+submission.to_csv("Gagandeep_Python_P4_part2.csv")
+
